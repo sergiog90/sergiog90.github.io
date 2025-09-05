@@ -1,62 +1,33 @@
-<!DOCTYPE HTML>
-<html dir="ltr" lang="en-US">
-    <head>
-        <title>Sergio García | iOS Developer</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <meta name="description" content="Sergio García - iOS Developer">
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-        <link rel="stylesheet" href="assets/css/main.css" />
-        <!-- Global site tag (gtag.js) - Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-LWXELT0Q8N"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-LWXELT0Q8N');
-        </script>
-    </head>
-    <body>
-        <!-- Wrapper -->
-        <div id="wrapper">
-            <!-- Main -->
+---
+layout: default
+---
+<!-- Main -->
 
-<!-- Toggle Preview - ctrl+shift+v or cmd+shift+v
-Open Preview to the Side - ctrl+k v or cmd+k v -->
-            <section id="main">
-                <header>
-                    <span class="avatar">
-                        <img src="images/sergio-garcia-avatar.jpg" alt="Sergio García avatar" width="144" height="144"/>
-                    </span>
-                    <h1>Sergio García</h1>
-                    <h2>iOS Developer</h2>
-                    <div>
-                        <span style="vertical-align: middle;">Now at </span>
-                        <span><img style="vertical-align: middle" src="images/openbank.svg" alt="Openbank" height="34" width="auto"/></span>
-                    </div>                      
-                    <div>
-                        </br>
-                        <span style="vertical-align: middle; font-size:75%">Previously at</span></br>
-                        <span><img style="vertical-align: middle" src="images/dormakaba.svg" alt="dormakaba" height="12" width="auto"/></span></br>
-                        <span><img style="vertical-align: middle" src="images/ust.png" alt="UST" height="22" width="auto"/></span>
-                    </div>                      
-                </header>
-                <br>
-                <footer>
-                    <ul class="icons">
-                        <li><a href="https://www.linkedin.com/in/sergiog90" target="_blank" class="icon brands fa-linkedin">LinkedIn</a></li>
-                        <li><a href="https://github.com/sergiog90" target="_blank" class="icon brands fa-github">GitHub</a></li>
-                    </ul>
-                </footer>
-            </section>
-
-            <!-- Footer -->
-            <footer id="footer">
-                <ul class="copyright">
-                    <li><a href="https://www.linkedin.com/in/sergiog90" target="_blank">LinkedIn</a></li>
-                    <li><a href="https://github.com/sergiog90" target="_blank">GitHub</a></li>
-                </ul>
-            </footer>
-        </div>
-    </body>
-</html>
+<section id="main">
+    <header>
+        <span class="avatar">
+            <img src="{{ site.avatar | relative_url }}" alt="{{ site.name }} avatar" width="144" height="144"/>
+        </span>
+        <h1>{{ site.name }}</h1>
+        <h2>{{ site.role }}</h2>
+        <div>
+            <span style="vertical-align: middle;">Now at </span>
+            <span><img style="vertical-align: middle" src="{{ site.companies.current.logo | relative_url }}" alt="{{ site.companies.current.name }}" height="{{ site.companies.current.logo_height }}" width="auto"/></span>
+        </div>                      
+        <div>
+            </br>
+            <span style="vertical-align: middle; font-size:75%">Previously at</span></br>
+            {% for company in site.companies.previous %}
+            <span><img style="vertical-align: middle" src="{{ company.logo | relative_url }}" alt="{{ company.name }}" height="{{ company.logo_height }}" width="auto"/></span></br>
+            {% endfor %}
+        </div>                      
+    </header>
+    <br>
+    <footer>
+        <ul class="icons">
+            {% for network in site.social_networks %}
+            <li><a href="{{ network.url }}" target="_blank" class="icon brands {{ network.icon }}">{{ network.name }}</a></li>
+            {% endfor %}
+        </ul>
+    </footer>
+</section>

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:sergiog.me)",
+      "Bash(bundle install:*)",
+      "Bash(bundle exec jekyll serve:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,57 @@
+# Jekyll Configuration for GitHub Pages
+title: "Sergio García | iOS Developer"
+description: "Sergio García - iOS Developer"
+url: "https://sergiog.me"
+baseurl: ""
+
+# Personal Information
+name: "Sergio García"
+role: "iOS Developer"
+current_company: "Openbank"
+avatar: "images/sergio-garcia-avatar.jpg"
+
+# Social Networks
+social_networks:
+  - name: "LinkedIn"
+    url: "https://www.linkedin.com/in/sergiog90"
+    icon: "fa-linkedin"
+  - name: "GitHub"
+    url: "https://github.com/sergiog90"
+    icon: "fa-github"
+
+# Companies
+companies:
+  current:
+    name: "Openbank"
+    logo: "images/openbank.svg"
+    logo_height: 34
+  previous:
+    - name: "dormakaba"
+      logo: "images/dormakaba.svg"
+      logo_height: 12
+    - name: "UST"
+      logo: "images/ust.png"
+      logo_height: 22
+
+# Google Analytics
+google_analytics: "G-LWXELT0Q8N"
+
+# GitHub Pages / Jekyll Settings
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Markdown settings
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  input: GFM
+
+# Exclude files from processing
+exclude:
+  - vendor/
+  - .ruby-lsp/
+  - .DS_Store
+  - README.md
+  - Gemfile
+  - Gemfile.lock
