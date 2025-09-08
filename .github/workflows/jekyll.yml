@@ -111,7 +111,7 @@ jobs:
         run: |
           DOMAIN=$(gh api repos/${GITHUB_REPOSITORY}/pages --jq '.cname')
 
-          rm ./$SITE_DIR/CNAME
+          rm -f ./$SITE_DIR/CNAME | true
           echo "$DOMAIN" > ./$SITE_DIR/CNAME
           echo "www.$DOMAIN" >> ./$SITE_DIR/CNAME
 
