@@ -73,8 +73,8 @@ jobs:
           for preview in $existing_previews; do
             if [[ $keep_list != *"$preview"* ]];then
               deleted_previews="$deleted_previews $preview"
-              # git rm -rf "$preview"
-              # git commit -m "Cleanup orphaned preview: $preview" || true
+              git rm -rf "$preview"
+              git commit -m "Cleanup orphaned preview: $preview" || true
             fi
           done
 
@@ -84,7 +84,5 @@ jobs:
           else
             echo "✅ No orphaned previews deleted"
           fi
-          # git push
+          git push
           cd ..
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
