@@ -13,8 +13,6 @@ on:
   # Runs on pushes targeting the default branch
   push:
     branches: ['*']
-  pull_request:
-    types: [opened, synchronize, reopened]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -72,19 +70,12 @@ jobs:
           name: 'github-pages'
           path: "$SITE_DIR"
 
-      # Definir preview name
       - name: Define preview name
         id: preview_name
         run: |
-          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
-            echo "name=pr-${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
-          else
-            if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
-              echo "name=branch-main" >> $GITHUB_OUTPUT
-            else
-              echo "name=branch-${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
-            fi
-          fi
+          raw_branch="${{ github.ref_name }}"
+          safe_branch="${raw_branch//\//_}"
+          echo "name=$safe_branch" >> $GITHUB_OUTPUT
 
       - name: Deploy preview to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
@@ -97,27 +88,6 @@ jobs:
         id: preview_url
         run: |
           echo "url=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ steps.preview_name.outputs.name }}/" >> $GITHUB_OUTPUT
-
-      - name: Show deployed preview URL
-        run: |
-          echo ""
-          echo "✅ Preview deployed:"
-          echo "👉 ${{ steps.preview_url.outputs.url }}"
-          echo ""
-
-      - name: Comment preview link on PR
-        if: github.event_name == 'pull_request'
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          header: preview-link
-          message: |
-            ✅ Preview deployed
-
-            [![Open PR Preview](https://img.shields.io/badge/Preview-abrir-brightgreen?style=for-the-badge)](${{ steps.preview_url.outputs.url }})
-
-            🔗 PR URL:
-            ${{ steps.preview_url.outputs.url }}/
-
 
   deploy_production:
     if: github.ref_name == 'main'
@@ -146,44 +116,3 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: "./$SITE_DIR"
-
-      # - name: Deploy to GitHub Pages
-      #   id: deployment
-      #   uses: actions/deploy-pages@v4
-
-  cleanup:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout gh-pages
-        uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-
-      - name: Get list of valid previews (branches + PRs)
-        id: valid
-        run: |
-          branches=$(gh api repos/${GITHUB_REPOSITORY}/branches --jq '.[].name' | sed 's/^/branch-/')
-          prs=$(gh api repos/${GITHUB_REPOSITORY}/pulls --jq '.[].number' | sed 's/^/pr-/')
-          # Add branch-main for security
-          echo "list=$branches $prs branch-main" >> $GITHUB_OUTPUT
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Delete orphaned preview dirs
-        run: |
-          valid="${{ steps.valid.outputs.list }}"
-          for dir in */ ; do
-            name=$(basename "$dir")
-            if [[ ! " $valid " =~ " $name " ]]; then
-              echo "Deleting orphan preview: $name"
-              # rm -rf "$dir"
-            fi
-          done
-
-      - name: Push cleaned gh-pages
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "Cleanup orphan previews" || echo "No changes"
-          git push
