@@ -70,7 +70,7 @@ jobs:
       - uses: actions/download-artifact@v5
         with:
           name: 'github-pages'
-          path: "$SITE_DIR"
+          path: "${{ env.SITE_DIR }}"
 
       - name: Define preview name
         id: preview_name
@@ -83,7 +83,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: "./$SITE_DIR"
+          publish_dir: "${{ env.SITE_DIR }}"
           destination_dir: ${{ steps.preview_name.outputs.name }}
 
       - name: Get Preview URL
@@ -100,25 +100,29 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/download-artifact@v5
         with:
           name: 'github-pages'
-          path: "$SITE_DIR"
+          path: "${{ env.SITE_DIR }}"
 
       - name: Create CNAME for production
         run: |
           DOMAIN=$(gh api repos/${GITHUB_REPOSITORY}/pages --jq '.cname')
+          CNAME_PATH="${{ env.SITE_DIR }}/CNAME"
           echo "Using custom domain: $DOMAIN"
 
-          rm -f ./$SITE_DIR/CNAME | true
-          touch ./$SITE_DIR/CNAME
-          echo "$DOMAIN" > ./$SITE_DIR/CNAME
-          echo "www.$DOMAIN" >> ./$SITE_DIR/CNAME
+          pwd
+          ls -la
+          rm -f "${CNAME_PATH}" | true
+          touch "${CNAME_PATH}"
+          echo "$DOMAIN" > "${CNAME_PATH}"
+          echo "www.$DOMAIN" >> "${CNAME_PATH}"
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: peaceiris/actions-gh-pages@v4
         with:
-          publish_dir: "./$SITE_DIR"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: "${{ env.SITE_DIR }}"
