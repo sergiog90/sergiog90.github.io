@@ -1,0 +1,90 @@
+name: Cleanup GitHub Pages Previews
+
+on:
+  delete:
+    branches:
+      - '*'
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: 'cleanup'
+  cancel-in-progress: false
+
+jobs:
+  cleanup-previews:
+    name: Cleanup previews
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: List directories in gh-pages
+        id: list_dirs
+        run: |
+          echo "🔍 Listing directories in gh-pages..."
+          set +e
+          gh_pages_list=$(gh api repos/${GITHUB_REPOSITORY}/git/trees/gh-pages?recursive=1 --jq '.tree[] | select(.type=="tree") | .path')
+          set -e
+          if [ -z "$gh_pages_list" ]; then
+            echo "ℹ️ gh-pages is empty"
+            gh_pages_list=""
+          fi
+          
+          echo "📂 Found directories:"
+          echo -e "$(echo "$gh_pages_list" | tr ' ' '\n')"
+          echo "existing_previews=$gh_pages_list" >> $GITHUB_OUTPUT
+
+      - name: List active branches
+        id: list_branches
+        run: |
+          branches=$(gh api repos/${GITHUB_REPOSITORY}/branches --jq '.[].name')
+          set +e
+          normalized_branches=""
+          for branch in $branches; do
+            safe_branch="${branch//\//_}"
+            normalized_branches="$normalized_branches $safe_branch"
+          done
+          set -e
+          echo "✅ Active branches converted to directories:"
+          echo -e "$(echo "$normalized_branches" | tr ' ' '\n')"
+          echo "normalized_branches=$normalized_branches" >> $GITHUB_OUTPUT
+
+      - name: Cleanup orphaned previews
+        run: |
+          existing_previews="${{ steps.list_dirs.outputs.existing_previews }}"
+          keep_list="${{ steps.list_branches.outputs.normalized_branches }}"
+
+          echo "💡 Directories to keep:"
+          echo -e "$(echo "$keep_list" | tr ' ' '\n')"
+
+          # Clone gh-pages and remove the full directory
+          git clone --branch gh-pages --single-branch https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git gh-pages-tmp
+          cd gh-pages-tmp
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          deleted_previews=""
+          for preview in $existing_previews; do
+            if [[ $keep_list != *"$preview"* ]];then
+              deleted_previews="$deleted_previews $preview"
+              # git rm -rf "$preview"
+              # git commit -m "Cleanup orphaned preview: $preview" || true
+            fi
+          done
+
+          if [ "$deleted_previews" ]; then
+            echo "🧹 Deleted previews: (orphaned branches)"
+            echo -e "$(echo "$deleted_previews" | tr ' ' '\n')"
+          else
+            echo "✅ No orphaned previews deleted"
+          fi
+          # git push
+          cd ..
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
