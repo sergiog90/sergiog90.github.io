@@ -31,6 +31,7 @@ concurrency:
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -59,6 +60,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
 
   deploy_preview:
+    name: Deploy preview
     environment:
       name: github-pages
       url: ${{ steps.preview_url.outputs.url }}
@@ -90,6 +92,7 @@ jobs:
           echo "url=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ steps.preview_name.outputs.name }}/" >> $GITHUB_OUTPUT
 
   deploy_production:
+    name: Deploy production
     if: github.ref_name == 'main'
     environment:
       name: github-pages
