@@ -110,8 +110,10 @@ jobs:
       - name: Create CNAME for production
         run: |
           DOMAIN=$(gh api repos/${GITHUB_REPOSITORY}/pages --jq '.cname')
+          echo "Using custom domain: $DOMAIN"
 
           rm -f ./$SITE_DIR/CNAME | true
+          touch ./$SITE_DIR/CNAME
           echo "$DOMAIN" > ./$SITE_DIR/CNAME
           echo "www.$DOMAIN" >> ./$SITE_DIR/CNAME
 
